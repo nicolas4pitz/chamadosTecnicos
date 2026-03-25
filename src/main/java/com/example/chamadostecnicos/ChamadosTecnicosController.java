@@ -27,19 +27,19 @@ public class ChamadosTecnicosController {
     }
 
     @PostMapping
-    public ResponseEntity<TicketsResponse> adicionarTicket(@RequestBody TicketsCreateRequest body) {
+    public ResponseEntity<TicketsResponse> createTicket(@RequestBody TicketsCreateRequest body) {
         Ticket ticket = service.createTicket(body.name(), body.description(), body.createdAt(), body.status());
         return ResponseEntity.status(HttpStatus.CREATED).body(TicketsResponse.from(ticket));
     }
 
     @GetMapping
-    public ResponseEntity<List<TicketsResponse>> listarTickets() {
+    public ResponseEntity<List<TicketsResponse>> listTickets() {
         List<TicketsResponse> tickets = service.findAll().stream().map(TicketsResponse::from).toList();
         return ResponseEntity.ok(tickets);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TicketsResponse> buscarTicketPorId(@PathVariable Long id) {
+    public ResponseEntity<TicketsResponse> getTicketById(@PathVariable Long id) {
         return service.findById(id)
                 .map(TicketsResponse::from)
                 .map(ResponseEntity::ok)
@@ -47,15 +47,15 @@ public class ChamadosTecnicosController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TicketsResponse> atualizarTicket(@PathVariable Long id, @RequestBody TicketsCreateRequest body) {
-        return service.updateTicket(id, body.status())
+    public ResponseEntity<TicketsResponse> updateTicket(@PathVariable Long id, @RequestBody TicketsCreateRequest body) {
+        return service.updateTicket(id, body.name(), body.description(), body.createdAt(), body.status())
                 .map(TicketsResponse::from)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping(value = "/{id}", produces = MediaType.TEXT_PLAIN_VALUE)
-    public ResponseEntity<String> deletarTicket(@PathVariable Long id) {
+    public ResponseEntity<String> deleteTicket(@PathVariable Long id) {
         boolean deleted = service.deleteTicket(id);
         if (!deleted) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ticket nao encontrado");
