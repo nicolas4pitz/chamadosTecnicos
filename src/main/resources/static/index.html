@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Daily Quests - Front básico</title>
+    <style>
+        body { font-family: sans-serif; max-width: 700px; margin: 84px auto; padding: 0 12px; background: #242424 }
+        form { margin-bottom: 20px; border: 0px 1px solid #595959; padding: 12px; }
+        h1, h2 { color: #f8f8f8; }
+        input, button { padding: 8px; margin: 4px 0; width: 100%; box-sizing: border-box; }
+        button { color: #dd2222; background: #080808 }
+        pre { background: #080808; color: #f8f8f8; padding: 12px; border-radius: 2px; margin-top: 12px }
+        button:hover {
+          cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chamados Tecnicos</h1>
+
+<form id="formTicket">
+    <h2>Criar Ticket</h2>
+    <input id="nameTicket" type="text" placeholder="name" required />
+    <input id="descriptionTicket" type="text" placeholder="description" required />
+      <input id="statusTicket" type="text" placeholder="status (OPEN, IN_PROGRESS, CLOSED)" />
+    <button type="submit">Criar ticket</button>
+</form>
+
+    <form id="formListTickets">
+      <h2>Listar Tickets</h2>
+      <button type="submit">GET /tickets</button>
+    </form>
+
+    <form id="formGetById">
+      <h2>Buscar Ticket por ID</h2>
+      <input id="getTicketId" type="number" placeholder="id" required />
+      <button type="submit">GET /tickets/{id}</button>
+    </form>
+
+    <form id="formUpdateById">
+      <h2>Atualizar Ticket</h2>
+      <input id="updateTicketId" type="number" placeholder="id" />
+      <input id="updateStatusTicket" type="text" placeholder="status (OPEN, IN_PROGRESS, CLOSED)" />
+      <button type="submit">PUT /tickets/{id}</button>
+    </form>
+
+    <form id="formDeleteById">
+      <h2>Deletar Ticket</h2>
+      <input id="deleteTicketId" type="number" placeholder="id" required />
+      <button type="submit">DELETE /tickets/{id}</button>
+    </form>
+
+
+
+<h2>Resposta</h2>
+<pre id="output">...</pre>
+
+<script>
+    const output = document.getElementById("output");
+
+    function show(data) {
+      output.textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function showResponse(res) {
+      if (!res.ok) {
+        const errorText = await res.text();
+        show({ status: res.status, error: errorText || "Erro na requisição" });
+        return;
+      }
+
+      const contentType = res.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) {
+        show({ status: res.status, message: "Operação concluída com sucesso" });
+        return;
+      }
+
+      show(await res.json());
+    }
+
+    document.getElementById("formTicket").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const body = {
+        name: document.getElementById("nameTicket").value,
+        description: document.getElementById("descriptionTicket").value,
+        status: document.getElementById("statusTicket").value || "OPEN"
+      };
+
+      const res = await fetch("/tickets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+
+      await showResponse(res);
+    });
+
+    document.getElementById("formListTickets").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const res = await fetch("/tickets", { method: "GET" });
+      await showResponse(res);
+    });
+
+    document.getElementById("formGetById").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const id = document.getElementById("getTicketId").value;
+      const res = await fetch(`/tickets/${id}`, { method: "GET" });
+      await showResponse(res);
+    });
+
+    document.getElementById("formUpdateById").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const id = document.getElementById("updateTicketId").value;
+      const body = {
+        status: document.getElementById("updateStatusTicket").value || "OPEN"
+      };
+
+      const res = await fetch(`/tickets/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+
+      await showResponse(res);
+    });
+
+    document.getElementById("formDeleteById").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const id = document.getElementById("deleteTicketId").value;
+      const res = await fetch(`/tickets/${id}`, { method: "DELETE" });
+      await showResponse(res);
+    });
+</script>
+</body>
+</html>
