@@ -58,4 +58,8 @@ public class Ticket {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 }
